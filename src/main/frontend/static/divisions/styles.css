@@ -1,0 +1,317 @@
+/* ============================
+   BoxingPedia — fighter page
+   (shares tokens with the root stylesheet)
+   ============================ */
+:root {
+    --bg: #08080a;
+    --bg-soft: #141417;
+    --panel: rgba(18, 18, 22, 0.72);
+    --panel-border: rgba(255, 255, 255, 0.08);
+    --gold: #d4af37;
+    --gold-light: #f2d67f;
+    --crimson: #b3121f;
+    --crimson-light: #e63946;
+    --text: #f3f1ea;
+    --text-dim: #a8a7ad;
+    --radius-lg: 22px;
+    --radius-md: 14px;
+    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.45);
+    --shadow-hover: 0 18px 40px rgba(0, 0, 0, 0.55);
+    --font-display: "Bebas Neue", "Brush Script MT", cursive;
+    --font-body: "Inter", Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+::selection {
+    background: var(--gold);
+    color: #100c02;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: var(--font-body);
+    color: var(--text);
+    background:
+        radial-gradient(ellipse 900px 500px at 50% -10%, rgba(212, 175, 55, 0.16), transparent 60%),
+        radial-gradient(ellipse at top, #1c1c21 0%, #08080a 65%);
+}
+
+.hero {
+    padding: 56px 20px 24px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+header h1 a {
+    text-decoration: none;
+    font-family: var(--font-display);
+    font-size: 62px;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, var(--gold-light), var(--crimson-light));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 4px 18px rgba(212, 175, 55, 0.25));
+}
+
+/* ---------- Navigation (shared look) ---------- */
+.topnav {
+    position: sticky;
+    top: 12px;
+    z-index: 20;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    width: fit-content;
+    max-width: calc(100% - 32px);
+    margin: 0 auto 32px;
+    padding: 8px;
+    background: var(--panel);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid var(--panel-border);
+    border-radius: 999px;
+    box-shadow: var(--shadow-soft);
+}
+
+.topnav a {
+    position: relative;
+    color: var(--text);
+    text-align: center;
+    padding: 10px 20px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 999px;
+    transition: color 0.2s ease, background 0.2s ease;
+    white-space: nowrap;
+}
+
+.topnav a:hover {
+    background: rgba(212, 175, 55, 0.14);
+    color: var(--gold-light);
+}
+
+.topnav a.active {
+    background: linear-gradient(135deg, var(--crimson), var(--crimson-light));
+    color: #fff;
+}
+
+/* ---------- Fighter profile card ---------- */
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+}
+
+.card {
+    display: block;
+    width: 100%;
+    max-width: 360px;
+    text-decoration: none;
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-hover);
+    border-color: rgba(212, 175, 55, 0.55);
+}
+
+.card img {
+    width: 100%;
+    height: 260px;
+    display: block;
+    object-fit: cover;
+    background: var(--bg-soft);
+    /* falls back gracefully while #fighterImg has no src yet */
+    color: transparent;
+    font-size: 0;
+}
+
+.card h1 {
+    margin: 18px 20px 4px;
+    font-family: var(--font-display);
+    font-size: 34px;
+    letter-spacing: 1px;
+    color: var(--gold-light);
+    min-height: 1.2em;
+}
+
+.card p {
+    display: flex;
+    justify-content: space-between;
+    margin: 0;
+    padding: 10px 20px;
+    font-size: 14px;
+    border-top: 1px solid var(--panel-border);
+}
+
+.card p:first-of-type {
+    border-top: none;
+    margin-top: 10px;
+}
+
+.card p:last-of-type {
+    padding-bottom: 20px;
+}
+
+.stat-label {
+    color: var(--text-dim);
+    text-transform: uppercase;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    align-self: center;
+}
+
+.stat-value {
+    font-weight: 600;
+    text-align: right;
+}
+
+/* ---------- Division page: fighters from the database ---------- */
+.division-title {
+    margin: 0;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 44px;
+    letter-spacing: 3px;
+    color: var(--text);
+}
+
+.fighter-card {
+    position: relative;
+    max-width: 300px;
+}
+
+.fighter-card.champion {
+    border-color: rgba(212, 175, 55, 0.7);
+    box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.35), 0 14px 40px rgba(212, 175, 55, 0.18);
+}
+
+.photo-placeholder {
+    height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #1d1d22, var(--bg-soft));
+    font-family: var(--font-display);
+    font-size: 72px;
+    letter-spacing: 4px;
+    color: rgba(255, 255, 255, 0.18);
+}
+
+.rank-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text);
+    background: rgba(8, 8, 10, 0.75);
+    border: 1px solid var(--panel-border);
+    backdrop-filter: blur(6px);
+}
+
+.champion .rank-badge {
+    color: #100c02;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    border-color: transparent;
+}
+
+.nickname {
+    margin: 0 20px 6px;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--text-dim);
+}
+
+.status-message {
+    width: 100%;
+    text-align: center;
+    color: var(--text-dim);
+}
+
+/* ---------- Buttons (shared look) ---------- */
+.actions,
+section:has(> #testBtn) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    padding: 20px 20px 48px;
+}
+
+.btn,
+#testBtn,
+#testsBtn,
+#testBtns {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--crimson), var(--crimson-light));
+    border: none;
+    padding: 14px 30px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(179, 18, 31, 0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn:hover,
+#testBtn:hover,
+#testsBtn:hover,
+#testBtns:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(179, 18, 31, 0.5);
+}
+
+/* ---------- Scrollbar polish (WebKit) ---------- */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 55, 0.4);
+    border-radius: 10px;
+}
+
+@media (max-width: 640px) {
+    header h1 a {
+        font-size: 44px;
+        letter-spacing: 2px;
+    }
+}
