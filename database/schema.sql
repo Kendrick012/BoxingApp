@@ -19,8 +19,10 @@ CREATE TABLE boxers (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     name        TEXT    NOT NULL,
     nickname    TEXT,
+    organization TEXT,    -- whose ranking this is: WBA, WBC, IBF, WBO ... (empty = overall ranking)
     division_id INTEGER REFERENCES divisions(id),
-    rank        INTEGER,  -- 0 = champion, 1 = #1 contender, 2 = #2 ... (empty = unranked)
+    rank        REAL,     -- 0 = champion, 0.5 = regular champion, 0.7 = interim champion,
+                          -- 1 = #1 contender, 2 = #2 ... (empty = unranked)
     titles      TEXT,     -- belts held, e.g. WBC/IBF (empty = none)
     nationality TEXT,
     stance      TEXT,
@@ -36,5 +38,5 @@ CREATE TABLE boxers (
         CASE WHEN wins > 0 THEN ROUND(kos * 100.0 / wins, 1) END
     ) VIRTUAL,
     image_url   TEXT,
-    UNIQUE (division_id, rank)  -- two boxers in one division can't share a rank
+    UNIQUE (division_id, organization, rank)  -- two boxers can't share a rank in the same organization's list
 );

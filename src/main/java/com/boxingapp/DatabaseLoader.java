@@ -87,11 +87,11 @@ public class DatabaseLoader {
     /** Loads boxers.csv, matching each boxer's division name to a division id. */
     private static int loadBoxers(Connection conn, Map<String, Integer> divisionIds)
             throws IOException, SQLException {
-        String sql = "INSERT INTO boxers (name, nickname, division_id, rank, titles, nationality, stance, "
+        String sql = "INSERT INTO boxers (name, nickname, organization, division_id, rank, titles, nationality, stance, "
                 + "age, height_cm, reach_cm, wins, losses, draws, kos, image_url) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         int count = 0;
-        Map<String, String> takenRanks = new HashMap<>(); // "division|rank" -> boxer who has it
+        Map<String, String> takenRanks = new HashMap<>(); // "division|organization|rank" -> boxer who has it
 
         try (PreparedStatement insert = conn.prepareStatement(sql)) {
             for (CsvRow row : readCsv("boxers.csv")) {
@@ -99,52 +99,56 @@ public class DatabaseLoader {
                 insert.setString(1, name);
                 setText(insert, 2, row.get("nickname"));
 
+                // Organization (WBA, WBC, IBF, WBO ...): stored in capitals so "wbc" and "WBC" match
+                String organization = row.get("organization").toUpperCase();
+                setText(insert, 3, organization);
+
                 String division = row.get("division");
                 if (division.isEmpty()) {
-                    insert.setNull(3, Types.INTEGER);
+                    insert.setNull(4, Types.INTEGER);
                 } else {
                     Integer divisionId = divisionIds.get(division.toLowerCase());
                     if (divisionId == null) {
                         throw new IllegalArgumentException(row.where() + ": division \"" + division
                                 + "\" isn't in divisions.csv. Check the spelling or add it there.");
                     }
-                    insert.setInt(3, divisionId);
+                    insert.setInt(4, divisionId);
                 }
 
-                // Rank: "C" or "Champion" (or 0) = champion, 1 = #1 contender, empty = unranked
-                String rank = row.get("rank");
-                if (rank.equalsIgnoreCase("C") || rank.equalsIgnoreCase("Champion")) {
-                    rank = "0";
-                }
+                // Rank codes:  C  = champion           (stored as 0)
+                //              SC = regular champion   (stored as 0.5, so it sorts right after C)
+                //              IC = interim champion   (stored as 0.7, after SC)
+                //              1, 2, 3 ... = contenders;  empty = unranked
+                String rank = rankCode(row.get("rank"));
                 if (!rank.isEmpty()) {
-                    String key = division.toLowerCase() + "|" + rank;
+                    String key = division.toLowerCase() + "|" + organization + "|" + rank;
                     String holder = takenRanks.putIfAbsent(key, name);
                     if (holder != null) {
-                        String label = rank.equals("0") ? "champion" : "rank " + rank;
                         throw new IllegalArgumentException(row.where() + ": " + name + " and " + holder
-                                + " are both " + label + " in " + division + ".");
+                                + " are both " + rankLabel(rank) + " in " + division
+                                + (organization.isEmpty() ? "" : " (" + organization + ")") + ".");
                     }
                 }
-                setNumber(insert, 4, rank, row, false);
-                setText(insert, 5, row.get("titles"));
+                setNumber(insert, 5, rank, row, true);
+                setText(insert, 6, row.get("titles"));
 
-                setText(insert, 6, row.get("nationality"));
-                setText(insert, 7, row.get("stance"));
-                setNumber(insert, 8, row.get("age"), row, false);
-                setNumber(insert, 9, row.get("height_cm"), row, false);
-                setNumber(insert, 10, row.get("reach_cm"), row, false);
+                setText(insert, 7, row.get("nationality"));
+                setText(insert, 8, row.get("stance"));
+                setNumber(insert, 9, row.get("age"), row, false);
+                setNumber(insert, 10, row.get("height_cm"), row, false);
+                setNumber(insert, 11, row.get("reach_cm"), row, false);
 
                 String wins = orZero(row.get("wins"));
                 String kos = orZero(row.get("kos"));
-                setNumber(insert, 11, wins, row, false);
-                setNumber(insert, 12, orZero(row.get("losses")), row, false);
-                setNumber(insert, 13, orZero(row.get("draws")), row, false);
-                setNumber(insert, 14, kos, row, false);
+                setNumber(insert, 12, wins, row, false);
+                setNumber(insert, 13, orZero(row.get("losses")), row, false);
+                setNumber(insert, 14, orZero(row.get("draws")), row, false);
+                setNumber(insert, 15, kos, row, false);
                 if (Integer.parseInt(kos) > Integer.parseInt(wins)) {
                     throw new IllegalArgumentException(row.where() + ": " + name + " has more KOs ("
                             + kos + ") than wins (" + wins + ").");
                 }
-                setText(insert, 15, row.get("image_url"));
+                setText(insert, 16, row.get("image_url"));
 
                 insert.executeUpdate();
                 count++;
@@ -154,6 +158,26 @@ public class DatabaseLoader {
     }
 
     // ---------- small helpers ----------
+
+    /** Turns the rank typed in the CSV into the number stored in the database. */
+    private static String rankCode(String rank) {
+        return switch (rank.toUpperCase()) {
+            case "C", "CHAMPION" -> "0";
+            case "SC" -> "0.5";
+            case "IC" -> "0.7";
+            default -> rank;
+        };
+    }
+
+    /** Words for a rank, used in error messages. */
+    private static String rankLabel(String rank) {
+        return switch (rank) {
+            case "0" -> "champion";
+            case "0.5" -> "regular champion (SC)";
+            case "0.7" -> "interim champion (IC)";
+            default -> "rank " + rank;
+        };
+    }
 
     private static String orZero(String value) {
         return value.isEmpty() ? "0" : value;

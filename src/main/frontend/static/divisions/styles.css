@@ -37,8 +37,11 @@ body {
     font-family: var(--font-body);
     color: var(--text);
     background:
-        radial-gradient(ellipse 900px 500px at 50% -10%, rgba(212, 175, 55, 0.16), transparent 60%),
-        radial-gradient(ellipse at top, #1c1c21 0%, #08080a 65%);
+        radial-gradient(circle at 12% 18%, rgba(230, 57, 70, 0.25), transparent 42%),
+        radial-gradient(circle at 88% 18%, rgba(40, 110, 235, 0.25), transparent 42%),
+        radial-gradient(circle at 50% 115%, rgba(255, 255, 255 , 0.06), transparent 50%),
+        #08080a;
+        background-attachment: fixed;
 }
 
 .hero {
@@ -250,6 +253,34 @@ header h1 a {
     font-size: 13px;
     font-style: italic;
     color: var(--text-dim);
+}
+
+/* Regular (SC) and interim (IC) champions: silver instead of gold */
+.fighter-card.secondary-champion {
+    border-color: rgba(200, 200, 210, 0.45);
+}
+
+.secondary-champion .rank-badge {
+    color: #111114;
+    background: linear-gradient(135deg, #f1f1f4, #b9b9c2);
+    border-color: transparent;
+}
+
+/* One heading per organization (WBA, WBC, IBF, WBO) on a division page */
+.org-heading {
+    width: 100%;
+    margin: 24px 0 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--panel-border);
+    font-family: var(--font-display);
+    font-size: 30px;
+    letter-spacing: 2px;
+    color: var(--gold-light);
+    text-align: center;
+}
+
+.org-heading:first-child {
+    margin-top: 0;
 }
 
 .status-message {

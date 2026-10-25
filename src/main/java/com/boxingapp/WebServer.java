@@ -26,7 +26,7 @@ import java.util.Map;
  *   1. Serves the website files (HTML, CSS, JS, pictures) from src/main/frontend/static
  *   2. Answers API requests with data from database/boxing.db:
  *        /api/divisions                       all weight classes, lightest first
- *        /api/boxers?division=Strawweight     boxers in a division, champion first
+ *        /api/boxers?division=Strawweight     boxers in a division, grouped by organization, champion first
  *        /api/boxer?id=1                      one boxer
  *
  * When it starts, it runs DatabaseLoader first, so changes to your CSV files show up
@@ -43,7 +43,7 @@ public class WebServer {
 
     // Every boxer query returns these columns (division name included, not just its id)
     private static final String BOXER_COLUMNS =
-            "b.id, b.name, b.nickname, d.name AS division, b.rank, b.titles, b.nationality, "
+            "b.id, b.name, b.nickname, b.organization, d.name AS division, b.rank, b.titles, b.nationality, "
             + "b.stance, b.age, b.height_cm, b.reach_cm, b.wins, b.losses, b.draws, b.kos, "
             + "b.ko_percentage, b.image_url "
             + "FROM boxers b LEFT JOIN divisions d ON d.id = b.division_id";
@@ -82,7 +82,9 @@ public class WebServer {
         }
         String sql = "SELECT " + BOXER_COLUMNS
                 + " WHERE d.name = ? COLLATE NOCASE"
-                + " ORDER BY b.rank IS NULL, b.rank, b.name"; // champion (0) first, unranked last
+                // Grouped by organization (overall ranking first, then IBF, WBA, WBC, WBO A-Z),
+                // and inside each group: champion (0) first, then #1, #2 ..., unranked last
+                + " ORDER BY b.organization IS NOT NULL, b.organization, b.rank IS NULL, b.rank, b.name";
         try (Connection conn = DriverManager.getConnection(DB_URL);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, division);

@@ -56,7 +56,21 @@ async function loadBoxers() {
             showMessage(container, `No ${division} fighters yet. Add some to boxers.csv and restart the server.`);
             return;
         }
-        data.forEach(boxer => container.appendChild(makeCard(boxer)));
+        // If boxers have an organization (WBA, WBC, IBF, WBO ...), show one section per organization.
+        // The server already sorts them by organization, then rank.
+        const hasOrganizations = data.some(boxer => boxer.organization);
+        let currentGroup;
+        data.forEach(boxer => {
+            const group = boxer.organization || "Overall";
+            if (hasOrganizations && group !== currentGroup) {
+                const heading = document.createElement("h3");
+                heading.className = "org-heading";
+                heading.textContent = group;
+                container.appendChild(heading);
+                currentGroup = group;
+            }
+            container.appendChild(makeCard(boxer));
+        });
     } catch (err) {
         console.error(err);
         showMessage(container,
@@ -86,11 +100,14 @@ function makeCard(boxer) {
         card.appendChild(makePlaceholder(boxer.name));
     }
 
-    // Rank badge: "Champion", "#1", "#2", ...
+    // Rank badge: "Champion", "Regular Champion", "Interim Champion", "#1", "#2", ...
+    // (the database stores C as 0, SC as 0.5 and IC as 0.7)
     if (boxer.rank !== null) {
         const badge = document.createElement("span");
         badge.className = "rank-badge";
-        badge.textContent = boxer.rank === 0 ? "Champion" : `#${boxer.rank}`;
+        const champions = { 0: "Champion", 0.5: "Regular Champion", 0.7: "Interim Champion" };
+        badge.textContent = champions[boxer.rank] || `#${boxer.rank}`;
+        if (boxer.rank === 0.5 || boxer.rank === 0.7) card.classList.add("secondary-champion");
         card.appendChild(badge);
     }
 
