@@ -135,7 +135,7 @@ Example response from `/api/boxers?division=Strawweight`:
 
 ## Data sources
 
-Champions and rankings are based on [ESPN's boxing champions list](https://www.espn.com/boxing/story/_/id/12370125/boxing-champions-list) and the [Transnational Boxing Rankings Board (TBRB)](https://tbrb.org/mens-rankings). Fighter stats are entered by hand and may not be up to date.
+Champions and rankings are based on [ESPN's boxing champions list](https://www.espn.com/boxing/story/_/id/12370125/boxing-champions-list) and the [Transnational Boxing Rankings Board (TBRB)](https://tbrb.org/mens-rankings). 
 
 ## Author
 
